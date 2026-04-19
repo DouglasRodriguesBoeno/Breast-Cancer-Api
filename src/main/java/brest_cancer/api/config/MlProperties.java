@@ -1,8 +1,8 @@
-package config;
+package brest_cancer.api.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = "ml")
+@ConfigurationProperties(prefix = "brest_cancer/api/ml")
 public class MlProperties {
 
     private String baseUrl;
