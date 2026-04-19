@@ -1,6 +1,6 @@
 package brest_cancer.api.ml.client;
 
-import brest_cancer.api.ml.dto.MlFeatureResponse;
+import brest_cancer.api.ml.dto.MlFeaturesResponse;
 import brest_cancer.api.ml.dto.MlHealthResponse;
 import brest_cancer.api.ml.dto.MlModelInfoResponse;
 import brest_cancer.api.ml.exception.MlServiceIntegrationException;
@@ -21,8 +21,8 @@ public class MlServiceClient {
         return get("/v1/health", MlHealthResponse.class, "Erro ao consultar health do ML Service.");
     }
 
-    public MlFeatureResponse getFeatures() {
-        return get("/v1/features", MlFeatureResponse.class, "Erro ao consultar features do ML Service.");
+    public MlFeaturesResponse getFeatures() {
+        return get("/v1/features", MlFeaturesResponse.class, "Erro ao consultar features do ML Service.");
     }
 
     public MlModelInfoResponse getModelInfo() {

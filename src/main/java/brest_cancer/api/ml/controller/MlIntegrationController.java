@@ -1,7 +1,7 @@
 package brest_cancer.api.ml.controller;
 
 import brest_cancer.api.ml.client.MlServiceClient;
-import brest_cancer.api.ml.dto.MlFeatureResponse;
+import brest_cancer.api.ml.dto.MlFeaturesResponse;
 import brest_cancer.api.ml.dto.MlHealthResponse;
 import brest_cancer.api.ml.dto.MlModelInfoResponse;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +25,7 @@ public class MlIntegrationController {
     }
 
     @GetMapping("/features")
-    public ResponseEntity<MlFeatureResponse> features() {
+    public ResponseEntity<MlFeaturesResponse> features() {
         return ResponseEntity.ok(mlServiceClient.getFeatures());
     }
 
