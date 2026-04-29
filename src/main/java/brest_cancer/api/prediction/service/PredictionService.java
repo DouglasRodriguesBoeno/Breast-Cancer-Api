@@ -3,12 +3,17 @@ package brest_cancer.api.prediction.service;
 import brest_cancer.api.ml.client.MlServiceClient;
 import brest_cancer.api.ml.dto.MlPredictRequest;
 import brest_cancer.api.ml.dto.MlPredictResponse;
+import brest_cancer.api.prediction.dto.PredictionListItemResponse;
 import brest_cancer.api.prediction.dto.PredictionRequest;
 import brest_cancer.api.prediction.dto.PredictionResponse;
 import brest_cancer.api.prediction.persistence.entity.PredictionRecord;
 import brest_cancer.api.prediction.persistence.repository.PredictionRecordRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
 
 @Service
 public class PredictionService {
@@ -48,8 +53,28 @@ public class PredictionService {
         predictionRecord.setImputedFeatures(mlResponse.imputedFeatures());
         predictionRecord.setWarnings(mlResponse.warnings());
 
-        predictionRecordRepository.save(predictionRecord);
+        PredictionRecord savedPredictionRecord = predictionRecordRepository.saveAndFlush(predictionRecord);
 
-        return PredictionResponse.from(mlResponse);
+        return PredictionResponse.from(savedPredictionRecord);
     }
+
+    @Transactional(readOnly = true)
+    public List<PredictionListItemResponse> findAll() {
+        return predictionRecordRepository.findAllByOrderByCreatedAtDesc()
+                .stream()
+                .map(PredictionListItemResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public PredictionResponse findById(Long id) {
+        PredictionRecord predictionRecord = predictionRecordRepository.findById(id).
+                orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Analise nao encontrada para o id: " + id
+                ));
+
+        return PredictionResponse.from(predictionRecord);
+    }
+
 }

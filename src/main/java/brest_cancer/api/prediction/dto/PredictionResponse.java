@@ -1,10 +1,17 @@
 package brest_cancer.api.prediction.dto;
 
-import brest_cancer.api.ml.dto.MlPredictResponse;
+import brest_cancer.api.prediction.persistence.entity.PredictionRecord;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.time.OffsetDateTime;
 import java.util.List;
 
 public record PredictionResponse(
+        Long id,
+
+        @JsonProperty("created_at")
+        OffsetDateTime createdAt,
+
         @JsonProperty("predicted_label")
         String predictedLabel,
 
@@ -48,23 +55,25 @@ public record PredictionResponse(
 
         List<String> warnings
 ) {
-    public static PredictionResponse from(MlPredictResponse mlResponse) {
+    public static PredictionResponse from(PredictionRecord predictionRecord) {
         return new PredictionResponse(
-                mlResponse.predictedLabel(),
-                mlResponse.predictedLabelName(),
-                mlResponse.probabilityMalignant(),
-                mlResponse.probabilityBenign(),
-                mlResponse.usedThresholdMalignant(),
-                mlResponse.modelType(),
-                mlResponse.riskBand(),
-                mlResponse.summary(),
-                mlResponse.confidenceNote(),
-                mlResponse.inputQualityNote(),
-                mlResponse.clinicalNote(),
-                mlResponse.usedFeatures(),
-                mlResponse.ignoredFeatures(),
-                mlResponse.imputedFeatures(),
-                mlResponse.warnings()
+                predictionRecord.getId(),
+                predictionRecord.getCreatedAt(),
+                predictionRecord.getPredictedLabel(),
+                predictionRecord.getPredictedLabelName(),
+                predictionRecord.getProbabilityMalignant(),
+                predictionRecord.getProbabilityBenign(),
+                predictionRecord.getUsedThresholdMalignant(),
+                predictionRecord.getModelType(),
+                predictionRecord.getRiskBand(),
+                predictionRecord.getSummary(),
+                predictionRecord.getConfidenceNote(),
+                predictionRecord.getInputQualityNote(),
+                predictionRecord.getClinicalNote(),
+                predictionRecord.getUsedFeatures(),
+                predictionRecord.getIgnoredFeatures(),
+                predictionRecord.getImputedFeatures(),
+                predictionRecord.getWarnings()
         );
     }
 }
