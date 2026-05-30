@@ -1,6 +1,6 @@
 package brest_cancer.api.ml.dto;
 
-import tools.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Map;
 
