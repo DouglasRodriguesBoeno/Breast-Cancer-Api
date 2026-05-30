@@ -159,8 +159,12 @@ public class ReportIntelligenceService {
         return text
                 .replace("provavelmente não é perigoso", "é descrito como provavelmente benigno, mas requer acompanhamento conforme orientação médica")
                 .replace("provavelmente nao e perigoso", "é descrito como provavelmente benigno, mas requer acompanhamento conforme orientação médica")
+                .replace("provavelmente não perigoso", "descrito como provavelmente benigno, mas requer acompanhamento conforme orientação médica")
+                .replace("provavelmente nao perigoso", "descrito como provavelmente benigno, mas requer acompanhamento conforme orientação médica")
                 .replace("não é perigoso", "deve ser interpretado no contexto clínico por um profissional de saúde")
                 .replace("nao e perigoso", "deve ser interpretado no contexto clínico por um profissional de saúde")
+                .replace("não perigoso", "deve ser interpretado no contexto clínico por um profissional de saúde")
+                .replace("nao perigoso", "deve ser interpretado no contexto clínico por um profissional de saúde")
                 .replace("menores chances de malignidade", "características que podem estar associadas a menor suspeição, dependendo do contexto do exame")
                 .replace("menor chance de malignidade", "características que podem estar associadas a menor suspeição, dependendo do contexto do exame")
                 .trim();
