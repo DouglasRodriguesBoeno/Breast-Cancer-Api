@@ -1,7 +1,9 @@
 package brest_cancer.api.report_intelligence.service;
 
 import brest_cancer.api.report_intelligence.dto.AnalyzeReportRequest;
+import brest_cancer.api.report_intelligence.dto.ImportantTerm;
 import brest_cancer.api.report_intelligence.dto.ReportAnalysisResponse;
+import brest_cancer.api.report_intelligence.dto.StructuredFindings;
 import brest_cancer.api.report_intelligence.persistence.entity.ReportAnalysisRecord;
 import brest_cancer.api.report_intelligence.persistence.repository.ReportAnalysisRecordRepository;
 import brest_cancer.api.report_intelligence.provider.ReportIntelligenceProvider;
@@ -13,9 +15,13 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class ReportIntelligenceService {
+
+    private static final Pattern BIRADS_VALUE_PATTERN = Pattern.compile("(?i)^(?:BI[-\\s]?RADS\\s*)?([0-6](?:[ABC])?)$");
 
     private final ReportAnalysisRecordRepository reportAnalysisRecordRepository;
     private final ReportIntelligenceProvider reportIntelligenceProvider;
@@ -30,7 +36,8 @@ public class ReportIntelligenceService {
 
     @Transactional
     public ReportAnalysisResponse analyze(AnalyzeReportRequest request) {
-        ReportIntelligenceResult result = reportIntelligenceProvider.analyze(request);
+        ReportIntelligenceResult rawResult = reportIntelligenceProvider.analyze(request);
+        ReportIntelligenceResult result = normalizeResult(rawResult);
 
         ReportAnalysisRecord record = new ReportAnalysisRecord();
         record.setInputType(normalizeInputType(request.inputType()));
@@ -69,6 +76,94 @@ public class ReportIntelligenceService {
                 .stream()
                 .map(ReportAnalysisResponse::from)
                 .toList();
+    }
+
+    private ReportIntelligenceResult normalizeResult(ReportIntelligenceResult result) {
+        StructuredFindings normalizedFindings = normalizeStructuredFindings(result.structuredFindings());
+        List<ImportantTerm> normalizedTerms = normalizeImportantTerms(result.importantTerms());
+
+        return new ReportIntelligenceResult(
+                result.detectedLanguage(),
+                result.reportType(),
+                normalizedFindings,
+                normalizedTerms,
+                sanitizeEducationalText(result.educationalSummary()),
+                sanitizeEducationalText(result.simpleExplanation()),
+                result.wdbcCompatibility(),
+                normalizeSafetyNotes(result.safetyNotes()),
+                result.provider(),
+                result.providerModel()
+        );
+    }
+
+    private StructuredFindings normalizeStructuredFindings(StructuredFindings findings) {
+        if (findings == null) {
+            return null;
+        }
+
+        return new StructuredFindings(
+                normalizeBirads(findings.birads()),
+                findings.breastSide(),
+                findings.location(),
+                findings.measurements(),
+                findings.mentionedFindings(),
+                findings.mentionedRecommendations()
+        );
+    }
+
+    private String normalizeBirads(String birads) {
+        if (birads == null || birads.isBlank()) {
+            return birads;
+        }
+
+        Matcher matcher = BIRADS_VALUE_PATTERN.matcher(birads.trim());
+        if (matcher.matches()) {
+            return "BI-RADS " + matcher.group(1).toUpperCase(Locale.ROOT);
+        }
+
+        return birads.trim();
+    }
+
+    private List<ImportantTerm> normalizeImportantTerms(List<ImportantTerm> terms) {
+        if (terms == null) {
+            return List.of();
+        }
+
+        return terms.stream()
+                .map(term -> new ImportantTerm(
+                        normalizeBirads(term.term()),
+                        sanitizeEducationalText(term.explanation())
+                ))
+                .toList();
+    }
+
+    private List<String> normalizeSafetyNotes(List<String> safetyNotes) {
+        if (safetyNotes == null || safetyNotes.isEmpty()) {
+            return List.of(
+                    "Conteudo educacional: nao substitui avaliacao de profissional de saude.",
+                    "O sistema nao fornece diagnostico, tratamento ou definicao de urgencia clinica.",
+                    "A interpretacao completa deve ser feita com um profissional qualificado."
+            );
+        }
+
+        return safetyNotes.stream()
+                .map(this::sanitizeEducationalText)
+                .toList();
+    }
+
+    private String sanitizeEducationalText(String text) {
+        if (text == null || text.isBlank()) {
+            return text;
+        }
+
+        return text
+                .replace("provavelmente não é perigoso", "é descrito como provavelmente benigno, mas requer acompanhamento conforme orientação médica")
+                .replace("provavelmente nao e perigoso", "é descrito como provavelmente benigno, mas requer acompanhamento conforme orientação médica")
+                .replace("não é perigoso", "deve ser interpretado no contexto clínico por um profissional de saúde")
+                .replace("nao e perigoso", "deve ser interpretado no contexto clínico por um profissional de saúde")
+                .replace("menores chances de malignidade", "características que podem estar associadas a menor suspeição, dependendo do contexto do exame")
+                .replace("menor chance de malignidade", "características que podem estar associadas a menor suspeição, dependendo do contexto do exame")
+                .trim();
     }
 
     private String normalizeInputType(String inputType) {
