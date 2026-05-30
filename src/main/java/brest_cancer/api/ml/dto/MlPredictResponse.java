@@ -1,6 +1,6 @@
 package brest_cancer.api.ml.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import tools.jackson.annotation.JsonProperty;
 import java.util.List;
 
 public record MlPredictResponse(
