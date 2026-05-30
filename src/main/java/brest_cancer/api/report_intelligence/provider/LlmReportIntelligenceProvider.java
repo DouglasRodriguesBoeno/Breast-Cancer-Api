@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.server.ResponseStatusException;
-import tools.jackson.core.JsonProcessingException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
@@ -85,16 +84,18 @@ public class LlmReportIntelligenceProvider implements ReportIntelligenceProvider
                     PROVIDER_NAME,
                     llm.model()
             );
-        } catch (JsonProcessingException ex) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_GATEWAY,
-                    "Unable to parse structured LLM report intelligence response.",
-                    ex
-            );
+        } catch (ResponseStatusException ex) {
+            throw ex;
         } catch (RestClientException ex) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_GATEWAY,
                     "Unable to call LLM report intelligence provider.",
+                    ex
+            );
+        } catch (Exception ex) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_GATEWAY,
+                    "Unable to parse structured LLM report intelligence response.",
                     ex
             );
         }
