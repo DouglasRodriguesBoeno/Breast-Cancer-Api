@@ -1,7 +1,7 @@
 package brest_cancer.api.prediction.dto;
 
 import brest_cancer.api.prediction.persistence.entity.PredictionRecord;
-import tools.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.OffsetDateTime;
 
