@@ -1,6 +1,6 @@
 package brest_cancer.api.common.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import tools.jackson.annotation.JsonProperty;
 
 import java.time.OffsetDateTime;
 
