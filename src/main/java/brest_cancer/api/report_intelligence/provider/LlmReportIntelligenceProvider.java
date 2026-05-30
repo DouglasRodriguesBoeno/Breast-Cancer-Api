@@ -154,6 +154,9 @@ public class LlmReportIntelligenceProvider implements ReportIntelligenceProvider
                 - Use only information present in the report text.
                 - If information is missing, use null or an empty list.
                 - Keep explanations educational, calm, non-alarming and easy to understand.
+                - Avoid definitive reassurance such as "not dangerous", "safe", "no risk", or equivalent wording.
+                - Prefer wording such as "described as probably benign", "requires follow-up according to medical guidance", and "should be interpreted by a healthcare professional".
+                - When a BI-RADS category is present, output it in the normalized format "BI-RADS X".
 
                 Required WDBC feature names:
                 %s
